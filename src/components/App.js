@@ -5,7 +5,28 @@ import PetBrowser from "./PetBrowser";
 
 function App() {
   const [pets, setPets] = useState([]);
-  const [filters, setFilters] = useState({ type: "all" });
+
+  const fetchData = async (endpoint) => {
+    const response = await fetch(`http://localhost:3001/pets${endpoint}`);
+    const data = await response.json();
+    setPets(data);
+  };
+
+  const handleFilteredData = (e) => {
+    e.preventDefault();
+    if (e.target.value === "all") fetchData("");
+    else fetchData(`?type=${e.target.value}`);
+  };
+
+  const handleAdoption = (id) => {
+    const adoptedPets = pets.map((pet) => {
+      if (pet.id === id) {
+        return { ...pet, isAdopted: true };
+      } else return pet;
+    });
+    setPets(adoptedPets);
+    console.log(id);
+  };
 
   return (
     <div className="ui container">
@@ -15,10 +36,13 @@ function App() {
       <div className="ui container">
         <div className="ui grid">
           <div className="four wide column">
-            <Filters />
+            <Filters
+              findPets={() => fetchData("")}
+              onFilter={handleFilteredData}
+            />
           </div>
           <div className="twelve wide column">
-            <PetBrowser />
+            <PetBrowser pets={pets} handleAdoption={handleAdoption} />
           </div>
         </div>
       </div>
